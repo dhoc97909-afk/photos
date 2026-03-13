@@ -1,441 +1,985 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>שאגת הארי — פיד עדכונים</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    :root{
-      --red:#dc2626;
-      --blue:#1d4ed8;
-      --gold:#f59e0b;
-      --bg:#0a0a0f;
-      --surface:#13131a;
-      --surface2:#1c1c27;
-      --border:rgba(255,255,255,.07);
-      --text:#f0f0f5;
-      --muted:#8888a0;
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      font-family:'Assistant',sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      min-height:100vh;
-      overflow-x:hidden;
-    }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>תחרות יוצרי התמונות הגדולה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #f0d080;
+    --gold-dim: rgba(201,168,76,0.15);
+    --bg: #0a0a0f;
+    --bg2: #12101a;
+    --text: #e8e0d0;
+    --text-dim: rgba(232,224,208,0.5);
+    --border: rgba(201,168,76,0.2);
+    --card-bg: rgba(255,255,255,0.03);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 50%, #0d0f14 100%);
+    font-family: 'Heebo', 'Arial Hebrew', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    direction: rtl;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: radial-gradient(circle, rgba(201,168,76,0.12) 1px, transparent 1px);
+    background-size: 55px 55px;
+    pointer-events: none; z-index: 0;
+  }
 
-    /* ── BACKGROUND TEXTURE ── */
-    body::before{
-      content:'';
-      position:fixed;inset:0;
-      background:
-        radial-gradient(ellipse 80% 60% at 20% -10%, rgba(220,38,38,.12) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(29,78,216,.10) 0%, transparent 55%);
-      pointer-events:none;z-index:0;
-    }
+  /* ── HEADER ── */
+  header {
+    position: relative; z-index: 10;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,15,0.92);
+    backdrop-filter: blur(20px);
+    padding: 2.5rem 2rem 2rem;
+    text-align: center;
+  }
+  .subtitle-tag {
+    font-size: 0.75rem; letter-spacing: 0.4em;
+    color: var(--gold); text-transform: uppercase;
+    margin-bottom: 0.75rem; opacity: 0.85;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 5vw, 3.2rem); font-weight: 900;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    letter-spacing: 0.02em; line-height: 1.2;
+  }
+  .header-stats {
+    margin-top: 1.5rem; display: flex;
+    justify-content: center; gap: 1.5rem; flex-wrap: wrap;
+  }
+  .stat-pill {
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 100px; padding: 0.5rem 1.4rem;
+    font-size: 0.85rem; color: var(--gold); transition: all 0.3s;
+  }
+  .stat-pill.danger {
+    background: rgba(255,100,100,0.1);
+    border-color: rgba(255,100,100,0.3); color: #ff9080;
+  }
 
-    /* ── HEADER ── */
-    header{
-      position:sticky;top:0;z-index:100;
-      background:rgba(10,10,15,.88);
-      backdrop-filter:blur(18px);
-      border-bottom:1px solid var(--border);
-      padding:0 24px;
-      display:flex;align-items:center;justify-content:space-between;
-      height:64px;
-    }
-    .logo{
-      display:flex;align-items:center;gap:12px;
-    }
-    .logo-icon{
-      width:38px;height:38px;
-      background:linear-gradient(135deg,var(--red),#991b1b);
-      border-radius:10px;
-      display:flex;align-items:center;justify-content:center;
-      font-size:18px;
-      box-shadow:0 0 20px rgba(220,38,38,.35);
-    }
-    .logo-text{
-      font-size:20px;font-weight:900;letter-spacing:-.02em;
-      background:linear-gradient(90deg,#fff 60%,rgba(255,255,255,.5));
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    }
-    .live-badge{
-      display:flex;align-items:center;gap:6px;
-      background:rgba(220,38,38,.15);
-      border:1px solid rgba(220,38,38,.3);
-      border-radius:99px;padding:4px 12px;
-      font-size:12px;font-weight:700;color:#f87171;
-    }
-    .live-dot{
-      width:7px;height:7px;border-radius:50%;
-      background:#ef4444;
-      box-shadow:0 0 8px #ef4444;
-      animation:pulse 1.5s ease-in-out infinite;
-    }
-    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
+  /* ── MAIN ── */
+  main {
+    position: relative; z-index: 10;
+    max-width: 1400px; margin: 0 auto; padding: 3rem 1.5rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+  .empty-state {
+    text-align: center; padding: 6rem 2rem; color: rgba(201,168,76,0.4);
+  }
+  .empty-state .icon { font-size: 4rem; margin-bottom: 1rem; }
+  .empty-state h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: rgba(201,168,76,0.5); }
+  .empty-state p  { font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.6; }
 
-    /* ── MAIN ── */
-    main{
-      max-width:680px;margin:0 auto;
-      padding:32px 16px 80px;
-      position:relative;z-index:1;
-    }
+  /* loading */
+  #loadingState { text-align: center; padding: 6rem 2rem; color: rgba(201,168,76,0.5); }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid rgba(201,168,76,0.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1.5rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── EMPTY STATE ── */
-    #emptyState{
-      text-align:center;padding:80px 20px;
-      display:none;
-    }
-    #emptyState i{font-size:48px;color:var(--muted);opacity:.4;margin-bottom:16px;display:block}
-    #emptyState p{color:var(--muted);font-size:15px}
+  /* ── CARD ── */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; overflow: hidden;
+    transition: all 0.35s ease;
+    animation: fadeUp 0.5s ease both;
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.5); }
+  .card.voted {
+    border-color: rgba(201,168,76,0.5);
+    box-shadow: 0 10px 40px rgba(201,168,76,0.18);
+    transform: translateY(-4px);
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card-img-wrap {
+    position: relative; padding-top: 100%;
+    overflow: hidden; background: #1a1a2e; cursor: zoom-in;
+  }
+  .card-img-wrap img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; transition: transform 0.5s ease;
+  }
+  .card:hover .card-img-wrap img { transform: scale(1.05); }
+  .voted-badge {
+    position: absolute; top: 1rem; right: 1rem;
+    background: rgba(201,168,76,0.92);
+    border-radius: 100px; padding: 0.3rem 0.85rem;
+    font-size: 0.75rem; font-weight: 700; color: #0a0a0f; display: none;
+  }
+  .card.voted .voted-badge { display: block; }
+  .card-body   { padding: 1rem 1.25rem 1.25rem; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; }
+  .vote-count  { font-size: 0.9rem; color: rgba(201,168,76,0.7); font-weight: 500; }
+  .btn-vote {
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 100px; padding: 0.55rem 1.4rem;
+    color: var(--gold); font-weight: 700; font-size: 0.85rem;
+    cursor: pointer; transition: all 0.2s; font-family: inherit;
+  }
+  .btn-vote:hover:not(:disabled) { background: rgba(201,168,76,0.25); transform: scale(1.04); }
+  .btn-vote.active {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-color: transparent; color: #0a0a0f;
+  }
+  .btn-vote:disabled {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.2); cursor: not-allowed;
+  }
 
-    /* ── FEED ITEM ── */
-    .feed-item{
-      background:var(--surface);
-      border:1px solid var(--border);
-      border-radius:18px;
-      padding:20px 22px;
-      margin-bottom:14px;
-      animation:slideIn .35s cubic-bezier(.16,1,.3,1) both;
-      position:relative;
-      overflow:hidden;
-      transition:border-color .2s,transform .15s;
-    }
-    .feed-item:hover{
-      border-color:rgba(255,255,255,.13);
-      transform:translateY(-1px);
-    }
-    .feed-item.red-item{
-      border-right:3px solid var(--red);
-    }
-    .feed-item.red-item::before{
-      content:'';
-      position:absolute;inset:0;
-      background:linear-gradient(90deg,rgba(220,38,38,.06) 0%,transparent 50%);
-      pointer-events:none;
-    }
-    .feed-item.news-item{
-      border-right:3px solid var(--blue);
-    }
-    .feed-item.news-item::before{
-      content:'';
-      position:absolute;inset:0;
-      background:linear-gradient(90deg,rgba(29,78,216,.05) 0%,transparent 50%);
-      pointer-events:none;
-    }
-    @keyframes slideIn{
-      from{opacity:0;transform:translateY(-12px)}
-      to{opacity:1;transform:translateY(0)}
-    }
+  /* ── LIGHTBOX ── */
+  #lightbox {
+    display: none; position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,0.95); backdrop-filter: blur(12px);
+    align-items: center; justify-content: center; padding: 1rem;
+  }
+  #lightbox.open { display: flex; }
+  #lightbox img {
+    max-width: 92vw; max-height: 88vh; object-fit: contain;
+    border-radius: 12px; box-shadow: 0 0 80px rgba(0,0,0,0.8);
+  }
+  #lbClose {
+    position: absolute; top: 1.25rem; left: 1.25rem;
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 50%; color: #fff; font-size: 1.3rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; z-index: 10;
+  }
+  #lbClose:hover { background: rgba(255,255,255,0.18); transform: scale(1.1); }
 
-    /* ── ITEM HEADER ── */
-    .item-header{
-      display:flex;align-items:center;gap:10px;
-      margin-bottom:12px;
-    }
-    .profile-badge{
-      display:flex;align-items:center;gap:6px;
-      padding:3px 10px;border-radius:99px;
-      font-size:11px;font-weight:800;letter-spacing:.02em;
-    }
-    .profile-badge.news{background:rgba(29,78,216,.2);color:#93c5fd;border:1px solid rgba(29,78,216,.3)}
-    .profile-badge.red{background:rgba(220,38,38,.2);color:#fca5a5;border:1px solid rgba(220,38,38,.3)}
-    .item-meta{
-      display:flex;align-items:center;gap:8px;
-      margin-right:auto;
-      font-size:12px;color:var(--muted);
-    }
-    .item-meta .sep{opacity:.4}
+  /* ── GOOGLE SIGN-IN BUTTON (bottom-left, small) ── */
+  #googleBtn {
+    position: fixed; bottom: 2rem; left: 1.5rem;
+    width: 46px; height: 46px; border-radius: 50%;
+    background: rgba(10,10,15,0.88);
+    border: 1px solid rgba(201,168,76,0.2);
+    cursor: pointer; z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(10px);
+    transition: all 0.25s;
+    padding: 0;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  #googleBtn:hover {
+    border-color: rgba(201,168,76,0.55);
+    box-shadow: 0 4px 20px rgba(201,168,76,0.15);
+    transform: scale(1.1);
+  }
+  #googleBtn svg { width: 22px; height: 22px; display: block; }
 
-    /* ── ITEM BODY ── */
-    .item-text{
-      font-size:16px;line-height:1.7;
-      color:var(--text);
-      white-space:pre-wrap;
-      word-break:break-word;
-    }
-    .item-text a{color:#60a5fa;text-decoration:underline;word-break:break-all}
-    .item-text strong{font-weight:800}
-    .item-text em{font-style:italic}
+  /* signed-in avatar */
+  #googleBtn.signed-in {
+    border-color: rgba(201,168,76,0.6);
+    box-shadow: 0 0 0 2px rgba(201,168,76,0.25);
+  }
+  #googleBtn img.avatar {
+    width: 100%; height: 100%; border-radius: 50%;
+    object-fit: cover; display: block;
+  }
 
-    .item-image{
-      margin-top:14px;
-      border-radius:12px;
-      overflow:hidden;
-      border:1px solid var(--border);
-    }
-    .item-image img{
-      width:100%;display:block;
-      max-height:380px;object-fit:cover;
-    }
+  /* ── MODAL OVERLAY ── */
+  .overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.88); backdrop-filter: blur(10px);
+    align-items: center; justify-content: center; padding: 1rem;
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: linear-gradient(135deg, #12101a, #0d0f14);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 20px; width: 100%; max-width: 700px;
+    max-height: 90vh; overflow-y: auto;
+    padding: 2.5rem; direction: rtl;
+    animation: modalIn 0.3s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
 
-    .item-video{
-      margin-top:14px;
-    }
-    .video-btn{
-      display:inline-flex;align-items:center;gap:8px;
-      background:rgba(29,78,216,.18);
-      border:1px solid rgba(29,78,216,.3);
-      border-radius:10px;padding:8px 16px;
-      font-size:13px;font-weight:700;color:#93c5fd;
-      text-decoration:none;
-      transition:background .15s;
-    }
-    .video-btn:hover{background:rgba(29,78,216,.3)}
+  /* signing-in screen */
+  #signingScreen { text-align: center; padding: 2rem 0; }
+  #signingScreen .lock-icon { font-size: 3rem; margin-bottom: 1rem; }
+  #signingScreen h2 {
+    font-family: 'Playfair Display', serif;
+    color: var(--gold); font-size: 1.6rem; margin-bottom: 0.5rem;
+  }
+  #signingScreen p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 1.5rem; }
+  .google-signin-wrap {
+    display: flex; justify-content: center; margin-bottom: 1rem;
+  }
+  #signingError {
+    color: #ff7060; font-size: 0.85rem; margin-top: 0.75rem;
+    display: none; text-align: center;
+  }
+  .signing-spinner {
+    width: 28px; height: 28px;
+    border: 2px solid rgba(201,168,76,0.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 1rem auto 0; display: none;
+  }
 
-    .item-buttons{
-      display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;
-    }
-    .action-btn-link{
-      display:inline-flex;align-items:center;gap:6px;
-      background:var(--surface2);
-      border:1px solid var(--border);
-      border-radius:10px;padding:7px 14px;
-      font-size:13px;font-weight:700;color:var(--text);
-      text-decoration:none;
-      transition:border-color .15s,background .15s;
-    }
-    .action-btn-link:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.15)}
+  /* admin panel */
+  #adminPanel { display: none; }
+  .admin-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 2rem;
+  }
+  .admin-header h2 { font-family: 'Playfair Display', serif; color: var(--gold); font-size: 1.6rem; }
+  .admin-meta { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.4rem; }
+  .admin-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    object-fit: cover; border: 1px solid rgba(201,168,76,0.4);
+  }
+  .admin-email { font-size: 0.78rem; color: rgba(201,168,76,0.6); }
+  .btn-close {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px; color: var(--text-dim);
+    padding: 0.4rem 0.8rem; cursor: pointer;
+    font-size: 0.85rem; font-family: inherit; transition: all 0.2s;
+  }
+  .btn-close:hover { border-color: rgba(255,255,255,0.35); color: var(--text); }
 
-    /* ── ITEM FOOTER ── */
-    .item-footer{
-      display:flex;align-items:center;gap:10px;
-      margin-top:14px;padding-top:12px;
-      border-top:1px solid var(--border);
-      font-size:12px;color:var(--muted);
-    }
-    .groups-badge{
-      display:flex;align-items:center;gap:5px;
-    }
+  /* tabs */
+  .tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 0.6rem 1.2rem; background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px; color: var(--text-dim);
+    cursor: pointer; font-family: inherit; font-size: 0.85rem; transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: rgba(201,168,76,0.18);
+    border-color: rgba(201,168,76,0.6);
+    color: var(--gold); font-weight: 700;
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
 
-    /* ── LOADING ── */
-    #loadingBar{
-      position:fixed;top:0;right:0;left:0;height:2px;z-index:200;
-      background:linear-gradient(90deg,var(--red),var(--blue));
-      transform:scaleX(0);transform-origin:right;
-      transition:transform .3s;
-    }
-    #loadingBar.show{animation:loadPulse 1.2s ease-in-out infinite}
-    @keyframes loadPulse{0%{transform:scaleX(0);transform-origin:right}50%{transform:scaleX(.6);transform-origin:right}100%{transform:scaleX(0);transform-origin:left}}
+  /* section boxes */
+  .section-box {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem;
+  }
+  .section-box h3 { color: var(--gold); font-size: 1rem; margin-bottom: 1.25rem; }
+  .admin-input {
+    width: 100%; padding: 0.85rem 1rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 10px; color: var(--text);
+    font-family: inherit; font-size: 0.9rem;
+    outline: none; transition: border-color 0.2s;
+    margin-bottom: 0.75rem; direction: rtl;
+  }
+  .admin-input:focus { border-color: var(--gold); }
+  .add-msg { font-size: 0.85rem; margin-bottom: 0.75rem; display: none; }
+  .add-msg.success { color: #80d080; display: block; }
+  .add-msg.error   { color: #ff9080; display: block; }
+  .btn-add {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border: none; border-radius: 10px; padding: 0.75rem 2rem;
+    color: #0a0a0f; font-weight: 700; font-size: 0.9rem;
+    cursor: pointer; font-family: inherit; transition: opacity 0.2s;
+  }
+  .btn-add:hover { opacity: 0.9; }
+  .btn-add:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* ── TOAST ── */
-    #newToast{
-      position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);
-      background:var(--surface2);border:1px solid rgba(239,68,68,.3);
-      border-radius:99px;padding:8px 20px;
-      font-size:13px;font-weight:700;color:#fca5a5;
-      display:none;opacity:0;transition:all .3s;z-index:50;
-      pointer-events:none;cursor:pointer;
-      box-shadow:0 8px 32px rgba(0,0,0,.4);
-    }
-    #newToast.show{display:flex;opacity:1;transform:translateX(-50%) translateY(0);pointer-events:all}
+  /* image list */
+  #imgList { display: flex; flex-direction: column; gap: 0.75rem; }
+  .img-row {
+    display: flex; align-items: center; gap: 1rem;
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; padding: 0.75rem 1rem;
+  }
+  .img-row-thumb { width: 60px; height: 45px; object-fit: cover; border-radius: 8px; flex-shrink: 0; background: #1a1a2e; }
+  .img-row-info  { flex: 1; min-width: 0; }
+  .img-row-name  { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+  .img-row-votes { font-size: 0.8rem; color: rgba(201,168,76,0.6); margin-top: 0.15rem; }
+  .btn-del {
+    background: rgba(255,80,60,0.12);
+    border: 1px solid rgba(255,80,60,0.3);
+    border-radius: 8px; padding: 0.4rem 0.8rem;
+    color: #ff7060; cursor: pointer;
+    font-size: 0.8rem; font-family: inherit; flex-shrink: 0; transition: all 0.2s;
+  }
+  .btn-del:hover { background: rgba(255,80,60,0.22); }
 
-    /* ── SCROLL TO TOP ── */
-    #scrollTopBtn{
-      position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
-      background:var(--surface2);border:1px solid var(--border);
-      border-radius:99px;padding:8px 20px;
-      font-size:13px;font-weight:700;color:var(--muted);
-      cursor:pointer;display:none;
-      transition:all .2s;
-      box-shadow:0 4px 20px rgba(0,0,0,.4);
-    }
-    #scrollTopBtn:hover{color:var(--text);border-color:rgba(255,255,255,.15)}
-    #scrollTopBtn.show{display:flex;align-items:center;gap:6px}
-  </style>
+  /* rankings */
+  #rankList { display: flex; flex-direction: column; gap: 0.75rem; }
+  .rank-row {
+    display: flex; align-items: center; gap: 1rem;
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; padding: 0.85rem 1rem;
+  }
+  .rank-row.first { background: rgba(201,168,76,0.08); border-color: rgba(201,168,76,0.35); }
+  .rank-num {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.9rem; flex-shrink: 0; color: var(--text);
+  }
+  .rank-row.first .rank-num { background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: #0a0a0f; }
+  .rank-thumb { width: 50px; height: 38px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: #1a1a2e; }
+  .rank-info  { flex: 1; font-weight: 600; font-size: 0.9rem; }
+  .rank-votes { font-size: 1.1rem; font-weight: 700; color: var(--gold); flex-shrink: 0; }
+
+  /* settings */
+  .btn-save {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border: none; border-radius: 12px;
+    padding: 1rem 2rem; width: 100%;
+    color: #0a0a0f; font-weight: 700; font-size: 1rem;
+    cursor: pointer; font-family: inherit;
+    transition: opacity 0.2s, transform 0.2s; margin-top: 0.5rem;
+  }
+  .btn-save:hover { opacity: 0.92; transform: scale(1.01); }
+  .save-ok { display: none; color: #80d080; text-align: center; margin-top: 0.75rem; font-size: 0.9rem; }
+  .btn-danger {
+    background: rgba(255,60,60,0.12);
+    border: 1px solid rgba(255,60,60,0.35);
+    border-radius: 10px; padding: 0.7rem 1.5rem;
+    color: #ff7060; font-weight: 700; font-size: 0.85rem;
+    cursor: pointer; font-family: inherit;
+    transition: all 0.2s; width: 100%; margin-top: 0.5rem;
+  }
+  .btn-danger:hover { background: rgba(255,60,60,0.22); }
+
+  /* src toggle */
+  .src-toggle { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+  .src-btn {
+    flex: 1; padding: 0.6rem 0.75rem; background: transparent;
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+    color: var(--text-dim); cursor: pointer; font-family: inherit; font-size: 0.85rem; transition: all 0.2s;
+  }
+  .src-btn.active { background: rgba(201,168,76,0.15); border-color: rgba(201,168,76,0.5); color: var(--gold); font-weight: 600; }
+
+  /* drop zone */
+  .drop-zone {
+    border: 2px dashed rgba(201,168,76,0.3); border-radius: 14px;
+    padding: 2rem 1rem; text-align: center; cursor: pointer;
+    transition: all 0.25s; background: rgba(201,168,76,0.04);
+  }
+  .drop-zone:hover, .drop-zone.drag-over { border-color: rgba(201,168,76,0.7); background: rgba(201,168,76,0.09); }
+  .drop-icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+  .drop-text { font-size: 0.9rem; color: var(--text-dim); margin-bottom: 0.25rem; }
+  .drop-sub  { font-size: 0.75rem; color: rgba(201,168,76,0.45); }
+
+  ::-webkit-scrollbar       { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.25); border-radius: 3px; }
+
+  @media (max-width: 600px) {
+    .modal  { padding: 1.75rem 1.25rem; }
+    header  { padding: 2rem 1rem 1.5rem; }
+    main    { padding: 2rem 1rem; }
+  }
+</style>
 </head>
 <body>
 
-<div id="loadingBar"></div>
-
+<!-- HEADER -->
 <header>
-  <div class="logo">
-    <div class="logo-icon">🦁</div>
-    <span class="logo-text">שאגת הארי</span>
-  </div>
-  <div class="live-badge">
-    <div class="live-dot"></div>
-    <span>עדכונים חיים</span>
+  <div class="subtitle-tag">✦ <span id="subtitleDisplay">שלב 1 - אודישנים</span> ✦</div>
+  <h1>תחרות יוצרי התמונות הגדולה</h1>
+  <div class="header-stats">
+    <div class="stat-pill" id="imgCountPill">🏆 0 תמונות בתחרות</div>
+    <div class="stat-pill" id="votePill">🗳️ הצבעות שלך: 0 / 3</div>
   </div>
 </header>
 
+<!-- MAIN -->
 <main>
-  <div id="feedContainer"></div>
-  <div id="emptyState">
-    <i class="fas fa-satellite-dish"></i>
-    <p>ממתין לעדכונים...</p>
+  <div id="loadingState">
+    <div class="spinner"></div>
+    <p>טוען את התחרות...</p>
   </div>
+  <div id="emptyState" class="empty-state" style="display:none;">
+    <div class="icon">🖼️</div>
+    <h3>עדיין אין תמונות בתחרות</h3>
+    <p>המנהל יוסיף תמונות בקרוב</p>
+  </div>
+  <div class="grid" id="photoGrid"></div>
 </main>
 
-<div id="newToast" onclick="scrollToTop()">
-  <i class="fas fa-arrow-up" style="font-size:11px"></i>
-  <span id="newToastText">עדכון חדש</span>
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <button id="lbClose">✕</button>
+  <img id="lbImg" src="" alt=""/>
 </div>
 
-<button id="scrollTopBtn" onclick="scrollToTop()">
-  <i class="fas fa-arrow-up" style="font-size:11px"></i> חזרה לראש
+<!-- GOOGLE SIGN-IN BUTTON (bottom-left) -->
+<button id="googleBtn" title="כניסת מנהל דרך Google" onclick="openAdminModal()">
+  <!-- Google "G" SVG icon -->
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+  </svg>
 </button>
 
-<script>
-const BACKEND='https://dhoc97909.pythonanywhere.com';
-let feedItems=[];
-let lastTs=0;
-let pendingNew=[];
-let isAtTop=true;
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
 
-function esc(t){return(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-function renderText(t){
-  if(!t)return'';
-  let s=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-  s=s.replace(/\*([^*\n]+)\*/g,'<strong>$1</strong>');
-  s=s.replace(/_([^_\n]+)_/g,'<em>$1</em>');
-  s=s.replace(/(https?:\/\/[^\s<>"']+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
-  return s;
-}
-
-function formatDate(dateStr,timeStr){
-  // dateStr like "13/03/2026", timeStr like "14:22"
-  if(!dateStr)return timeStr||'';
-  const today=new Date().toLocaleDateString('he-IL',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'/');
-  if(dateStr===today)return 'היום, '+timeStr;
-  return dateStr+' '+timeStr;
-}
-
-function buildItem(e){
-  const isRed=e.profile==='red';
-  const profileLabel=isRed?'🚨 צבע אדום':'📰 מבזק חדשות';
-  const profileClass=isRed?'red':'news';
-
-  let mediaHtml='';
-  if(e.imgUrl) mediaHtml+=`<div class="item-image"><img src="${esc(e.imgUrl)}" alt="תמונה" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`;
-  if(e.videoUrl) mediaHtml+=`<div class="item-video"><a class="video-btn" href="${esc(e.videoUrl)}" target="_blank" rel="noopener"><i class="fas fa-play"></i> צפה בסרטון</a></div>`;
-
-  let buttonsHtml='';
-  if(e.buttons&&e.buttons.length){
-    buttonsHtml='<div class="item-buttons">'+e.buttons.map(b=>`<a class="action-btn-link" href="${esc(b.url)}" target="_blank" rel="noopener"><i class="fas fa-external-link-alt" style="font-size:10px"></i>${esc(b.text)}</a>`).join('')+'</div>';
-  }
-
-  const groups=e.groupCount||0;
-
-  return `<div class="feed-item ${profileClass}-item">
-    <div class="item-header">
-      <span class="profile-badge ${profileClass}">${profileLabel}</span>
-      <div class="item-meta">
-        <span>${formatDate(e.date,e.time)}</span>
+    <!-- SIGNING IN SCREEN -->
+    <div id="signingScreen">
+      <div class="lock-icon">🔐</div>
+      <h2>כניסת מנהל</h2>
+      <p>התחבר עם חשבון Google המורשה</p>
+      <!-- Google renders the sign-in button here -->
+      <div class="google-signin-wrap">
+        <div id="googleSignInBtn"></div>
       </div>
+      <div class="signing-spinner" id="signingSpinner"></div>
+      <div id="signingError"></div>
     </div>
-    <div class="item-text">${renderText(e.text)}</div>
-    ${mediaHtml}
-    ${buttonsHtml}
-    <div class="item-footer">
-      <span class="groups-badge"><i class="fas fa-users" style="font-size:10px"></i> ${groups} קבוצות</span>
-      ${e.sender?`<span class="sep">·</span><span>${esc(e.sender)}</span>`:''}
-    </div>
-  </div>`;
+
+    <!-- ADMIN PANEL -->
+    <div id="adminPanel">
+      <div class="admin-header">
+        <div>
+          <h2>⚙️ מערכת ניהול</h2>
+          <div class="admin-meta">
+            <img id="adminAvatar" class="admin-avatar" src="" alt="" style="display:none;"/>
+            <span class="admin-email" id="adminEmailLabel"></span>
+          </div>
+        </div>
+        <button class="btn-close" id="closeAdmin">סגור ✕</button>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tabImages">🖼️ תמונות</button>
+        <button class="tab-btn" data-tab="tabRankings">🏆 דירוג</button>
+        <button class="tab-btn" data-tab="tabSettings">🎛️ הגדרות</button>
+      </div>
+
+      <!-- TAB: IMAGES -->
+      <div class="tab-content active" id="tabImages">
+        <div class="section-box">
+          <h3>➕ הוספת תמונה חדשה</h3>
+          <input class="admin-input" id="addTitle" placeholder="שם התמונה / יוצר (אופציונלי)..."/>
+          <div class="src-toggle">
+            <button class="src-btn active" id="srcUploadBtn">📁 העלאה מהמחשב</button>
+            <button class="src-btn" id="srcUrlBtn">🔗 קישור URL</button>
+          </div>
+          <div id="srcUpload">
+            <div class="drop-zone" id="dropZone">
+              <div class="drop-icon">🖼️</div>
+              <div class="drop-text">גרור תמונה לכאן או לחץ לבחירה</div>
+              <div class="drop-sub">JPG · PNG · GIF · WEBP</div>
+              <input type="file" id="fileInput" accept="image/*" style="display:none"/>
+            </div>
+            <div id="previewWrap" style="display:none;margin-top:.75rem;position:relative;text-align:center;">
+              <img id="previewImg" src="" alt="" style="max-height:180px;max-width:100%;border-radius:10px;border:1px solid rgba(201,168,76,0.3);"/>
+              <button id="clearPreviewBtn" style="position:absolute;top:-.5rem;left:-.5rem;width:28px;height:28px;border-radius:50%;background:rgba(255,80,60,0.85);border:none;color:#fff;cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center;">✕</button>
+            </div>
+          </div>
+          <div id="srcUrl" style="display:none;margin-top:.5rem;">
+            <input class="admin-input" id="addUrl" placeholder="קישור URL לתמונה..." style="margin-bottom:0" dir="ltr"/>
+          </div>
+          <div class="add-msg" id="addMsg"></div>
+          <button class="btn-add" id="addBtn">הוסף תמונה</button>
+        </div>
+        <h3 style="color:var(--gold);font-size:1rem;margin-bottom:1rem;">📋 תמונות קיימות (<span id="imgListCount">0</span>)</h3>
+        <div id="imgList"></div>
+      </div>
+
+      <!-- TAB: RANKINGS -->
+      <div class="tab-content" id="tabRankings">
+        <h3 style="color:var(--gold);font-size:1rem;margin-bottom:1.25rem;">🏆 דירוג תמונות לפי הצבעות</h3>
+        <div id="rankList"></div>
+      </div>
+
+      <!-- TAB: SETTINGS -->
+      <div class="tab-content" id="tabSettings">
+        <div class="section-box">
+          <h3>📝 כותרת משנית</h3>
+          <p style="color:var(--text-dim);font-size:.85rem;margin-bottom:1rem;">נוכחי: "<span id="curSubtitle"></span>"</p>
+          <input class="admin-input" id="newSubtitle" placeholder="כותרת משנית חדשה..."/>
+        </div>
+        <div class="section-box">
+          <h3>🗳️ מספר הצבעות למשתמש</h3>
+          <p style="color:var(--text-dim);font-size:.85rem;margin-bottom:1rem;">נוכחי: <span id="curMaxVotes"></span> הצבעות</p>
+          <input class="admin-input" id="newMaxVotes" type="number" min="1" placeholder="מספר חדש..."/>
+        </div>
+        <button class="btn-save" id="saveSettingsBtn">💾 שמור הגדרות</button>
+        <div class="save-ok" id="saveOk">✓ ההגדרות נשמרו!</div>
+
+        <div class="section-box" style="margin-top:1.5rem;">
+          <h3>⚠️ איפוס הצבעות</h3>
+          <p style="color:var(--text-dim);font-size:.85rem;margin-bottom:1rem;">מחיקה מלאה של כל ההצבעות — לא ניתן לבטל!</p>
+          <button class="btn-danger" id="resetVotesBtn">🔄 אפס את כל ההצבעות</button>
+        </div>
+
+        <div class="section-box" style="margin-top:1.5rem;">
+          <h3>🔓 יציאה</h3>
+          <button class="btn-danger" id="logoutBtn" style="background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.3);color:var(--gold);">
+            התנתק מחשבון Google
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /adminPanel -->
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════════════
+const API_URL         = "https://dhoc97909.pythonanywhere.com";
+const GOOGLE_CLIENT_ID = "856723702772-jm929ihp29ovhribfaaph17pbaq6qr3n.apps.googleusercontent.com";
+
+// ══════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════
+let state = {
+  images:    [],
+  settings:  { maxVotes: 3, subtitle: "שלב 1 - אודישנים" },
+  userVotes: {}
+};
+let adminToken = sessionStorage.getItem("_adminToken") || null;
+const userId   = (() => {
+  let id = sessionStorage.getItem("_uid");
+  if (!id) { id = "u" + Math.random().toString(36).slice(2, 10); sessionStorage.setItem("_uid", id); }
+  return id;
+})();
+
+// ══════════════════════════════════════════════════════════
+//  API
+// ══════════════════════════════════════════════════════════
+async function api(path, body = null, isAdmin = false) {
+  const opts = { method: body ? "POST" : "GET", headers: { "Content-Type": "application/json" } };
+  if (isAdmin && adminToken) opts.headers["X-Admin-Token"] = adminToken;
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API_URL + path, opts);
+  return res.json();
 }
 
-function renderFeed(items,prepend=false){
-  const container=document.getElementById('feedContainer');
-  const empty=document.getElementById('emptyState');
-
-  if(!items.length&&!feedItems.length){
-    empty.style.display='block';
+// ══════════════════════════════════════════════════════════
+//  GOOGLE IDENTITY SERVICES
+// ══════════════════════════════════════════════════════════
+function initGoogle() {
+  if (!window.google || !google.accounts) {
+    setTimeout(initGoogle, 300);
     return;
   }
-  empty.style.display='none';
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback:  handleGoogleCredential,
+    auto_select: false,
+    cancel_on_tap_outside: true,
+  });
+  // Render the official sign-in button inside the modal
+  google.accounts.id.renderButton(
+    document.getElementById("googleSignInBtn"),
+    {
+      theme: "filled_black",
+      size:  "large",
+      text:  "signin_with",
+      locale: "he",
+      width: 240
+    }
+  );
+}
 
-  if(prepend){
-    // Insert new items at top without disrupting scroll
-    const scrollY=window.scrollY;
-    const frag=document.createDocumentFragment();
-    items.forEach(e=>{
-      const div=document.createElement('div');
-      div.innerHTML=buildItem(e);
-      frag.appendChild(div.firstChild);
-    });
-    container.insertBefore(frag,container.firstChild);
-    window.scrollTo(0,window.scrollY+(container.firstChild?.offsetHeight||0));
+async function handleGoogleCredential(response) {
+  showSpinner(true);
+  hideSigningError();
+  try {
+    const res = await api("/api/admin/google_login", { credential: response.credential });
+    if (res.success) {
+      adminToken = res.token;
+      sessionStorage.setItem("_adminToken", adminToken);
+      showAdminPanel(res);
+    } else {
+      showSigningError(res.error || "כניסה נכשלה");
+    }
+  } catch (e) {
+    showSigningError("שגיאת שרת: " + e.message);
+  }
+  showSpinner(false);
+}
+
+function showSpinner(on) {
+  document.getElementById("signingSpinner").style.display = on ? "block" : "none";
+}
+function showSigningError(msg) {
+  const el = document.getElementById("signingError");
+  el.textContent = msg; el.style.display = "block";
+}
+function hideSigningError() {
+  document.getElementById("signingError").style.display = "none";
+}
+
+function showAdminPanel(info) {
+  document.getElementById("signingScreen").style.display = "none";
+  document.getElementById("adminPanel").style.display    = "block";
+  document.getElementById("adminEmailLabel").textContent = info.email || "";
+  const av = document.getElementById("adminAvatar");
+  if (info.picture) { av.src = info.picture; av.style.display = "block"; }
+  // Update the corner button with avatar
+  const btn = document.getElementById("googleBtn");
+  if (info.picture) {
+    btn.innerHTML = `<img class="avatar" src="${info.picture}" alt="admin"/>`;
+    btn.classList.add("signed-in");
+    btn.title = "מחובר כ: " + (info.email || "מנהל");
+  }
+  renderAdminImgList(); renderRankings(); renderSettings();
+  setActiveTab("tabImages");
+}
+
+// ══════════════════════════════════════════════════════════
+//  LOAD
+// ══════════════════════════════════════════════════════════
+async function loadState() {
+  try {
+    const data     = await api("/api/state");
+    state.images   = data.images   || [];
+    state.settings = data.settings || state.settings;
+    try {
+      const sv = sessionStorage.getItem("_votes_" + userId);
+      if (sv) state.userVotes = JSON.parse(sv);
+    } catch {}
+    renderAll();
+  } catch (e) {
+    document.getElementById("loadingState").innerHTML =
+      '<p style="color:#ff9080;">⚠️ לא ניתן להתחבר לשרת. רענן את הדף.</p>';
+  }
+  document.getElementById("loadingState").style.display = "none";
+}
+
+// ══════════════════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════════════════
+function totalVotesUsed() { return Object.values(state.userVotes).filter(Boolean).length; }
+function canVote()        { return totalVotesUsed() < state.settings.maxVotes; }
+
+function renderHeader() {
+  document.getElementById("subtitleDisplay").textContent = state.settings.subtitle;
+  document.getElementById("imgCountPill").textContent    = "🏆 " + state.images.length + " תמונות בתחרות";
+  const used = totalVotesUsed(), max = state.settings.maxVotes;
+  const vp   = document.getElementById("votePill");
+  vp.textContent = "🗳️ הצבעות שלך: " + used + " / " + max;
+  vp.className   = "stat-pill" + (used >= max ? " danger" : "");
+}
+
+function renderGrid() {
+  const grid  = document.getElementById("photoGrid");
+  const empty = document.getElementById("emptyState");
+  if (!state.images.length) { empty.style.display = "block"; grid.innerHTML = ""; return; }
+  empty.style.display = "none"; grid.innerHTML = "";
+  state.images.forEach((img, i) => {
+    const voted = !!state.userVotes[img.id], disabled = !voted && !canVote();
+    const card  = document.createElement("div");
+    card.className = "card" + (voted ? " voted" : "");
+    card.style.animationDelay = (i * 0.07) + "s";
+    card.innerHTML = `
+      <div class="card-img-wrap" data-url="${esc(img.url)}">
+        <img src="${esc(img.url)}" alt="${esc(img.title)}" onerror="this.src='https://placehold.co/400x400/1a1a2e/c9a84c?text=תמונה'"/>
+        <div class="voted-badge">✓ הצבעת!</div>
+      </div>
+      <div class="card-body">
+        <div class="card-footer">
+          <span class="vote-count">${img.votes} ${img.votes===1?"הצבעה":"הצבעות"}</span>
+          <button class="btn-vote${voted?" active":""}" ${disabled?"disabled":""} data-id="${img.id}">
+            ${voted ? "✓ בטל הצבעה" : disabled ? "אזלו ההצבעות" : "הצבע ★"}
+          </button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+  grid.querySelectorAll(".btn-vote").forEach(b =>
+    b.addEventListener("click", () => handleVote(b.dataset.id)));
+  grid.querySelectorAll(".card-img-wrap").forEach(w =>
+    w.addEventListener("click", () => openLightbox(w.dataset.url)));
+}
+function renderAll() { renderHeader(); renderGrid(); }
+
+// ══════════════════════════════════════════════════════════
+//  VOTE
+// ══════════════════════════════════════════════════════════
+async function handleVote(id) {
+  const already = !!state.userVotes[id];
+  if (!already && !canVote()) return;
+  const action = already ? "remove" : "add";
+  state.userVotes[id] = !already;
+  const img = state.images.find(i => i.id === id);
+  if (img) img.votes += already ? -1 : 1;
+  sessionStorage.setItem("_votes_" + userId, JSON.stringify(state.userVotes));
+  renderAll();
+  try {
+    await api("/api/vote", { imageId: id, userId, action });
+  } catch {
+    state.userVotes[id] = already;
+    if (img) img.votes += already ? 1 : -1;
+    sessionStorage.setItem("_votes_" + userId, JSON.stringify(state.userVotes));
+    renderAll();
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  ADMIN RENDER
+// ══════════════════════════════════════════════════════════
+function renderAdminImgList() {
+  const list = document.getElementById("imgList");
+  document.getElementById("imgListCount").textContent = state.images.length;
+  if (!state.images.length) { list.innerHTML = '<div style="color:rgba(232,224,208,0.3);text-align:center;padding:2rem;">אין תמונות עדיין</div>'; return; }
+  list.innerHTML = state.images.map(img => `
+    <div class="img-row">
+      <img class="img-row-thumb" src="${esc(img.url)}" alt="" onerror="this.style.display='none'"/>
+      <div class="img-row-info">
+        <div class="img-row-name">${esc(img.title)}</div>
+        <div class="img-row-votes">${img.votes} הצבעות</div>
+      </div>
+      <button class="btn-del" data-id="${img.id}">מחק 🗑️</button>
+    </div>`).join("");
+  list.querySelectorAll(".btn-del").forEach(b =>
+    b.addEventListener("click", () => handleDelete(b.dataset.id)));
+}
+function renderRankings() {
+  const sorted = [...state.images].sort((a,b) => b.votes - a.votes);
+  const list   = document.getElementById("rankList");
+  if (!sorted.length) { list.innerHTML = '<div style="color:rgba(232,224,208,0.3);text-align:center;padding:2rem;">אין תמונות עדיין</div>'; return; }
+  const medals = ["🥇","🥈","🥉"];
+  list.innerHTML = sorted.map((img,i) => `
+    <div class="rank-row${i===0?" first":""}">
+      <div class="rank-num">${medals[i]||(i+1)}</div>
+      <img class="rank-thumb" src="${esc(img.url)}" alt="" onerror="this.style.display='none'"/>
+      <div class="rank-info">${esc(img.title)}</div>
+      <div class="rank-votes">${img.votes} ★</div>
+    </div>`).join("");
+}
+function renderSettings() {
+  document.getElementById("curSubtitle").textContent = state.settings.subtitle;
+  document.getElementById("curMaxVotes").textContent = state.settings.maxVotes;
+}
+
+// ══════════════════════════════════════════════════════════
+//  ADMIN ACTIONS
+// ══════════════════════════════════════════════════════════
+async function handleDelete(id) {
+  try {
+    await api("/api/admin/delete_image", { id }, true);
+    state.images = state.images.filter(i => i.id !== id);
+    delete state.userVotes[id];
+    renderAll(); renderAdminImgList(); renderRankings();
+  } catch (e) { alert("שגיאה במחיקה: " + e.message); }
+}
+
+document.getElementById("addBtn").addEventListener("click", async () => {
+  const title = document.getElementById("addTitle").value.trim();
+  const msg   = document.getElementById("addMsg");
+  const btn   = document.getElementById("addBtn");
+  let body    = { title };
+  if (currentSrc === "upload") {
+    if (!uploadedDataUrl) { msg.textContent = "נא לבחור תמונה"; msg.className = "add-msg error"; return; }
+    body.imageData = uploadedDataUrl;
   } else {
-    container.innerHTML=items.map(buildItem).join('');
+    const url = document.getElementById("addUrl").value.trim();
+    if (!url) { msg.textContent = "נא להזין URL"; msg.className = "add-msg error"; return; }
+    body.url = url;
   }
-}
+  btn.disabled = true; btn.textContent = "מעלה...";
+  try {
+    const res = await api("/api/admin/add_image", body, true);
+    if (res.success) {
+      state.images.push(res.image);
+      renderAll(); renderAdminImgList();
+      document.getElementById("addTitle").value = "";
+      if (currentSrc === "url") document.getElementById("addUrl").value = ""; else clearPreview();
+      msg.textContent = "✓ התמונה נוספה!"; msg.className = "add-msg success";
+      setTimeout(() => { msg.className = "add-msg"; }, 3000);
+    } else throw new Error(res.error);
+  } catch (e) {
+    msg.textContent = "שגיאה: " + (e.message || "נסה שנית"); msg.className = "add-msg error";
+  }
+  btn.disabled = false; btn.textContent = "הוסף תמונה";
+});
 
-async function loadFeed(){
-  setLoading(true);
-  try{
-    const r=await fetch(BACKEND+'/feed');
-    const d=await r.json();
-    if(d.status==='ok'){
-      feedItems=d.feed||[];
-      if(feedItems.length) lastTs=Math.max(...feedItems.map(e=>e.ts||0));
-      renderFeed(feedItems);
+document.getElementById("saveSettingsBtn").addEventListener("click", async () => {
+  const sub = document.getElementById("newSubtitle").value.trim();
+  const mv  = document.getElementById("newMaxVotes").value;
+  try {
+    const res = await api("/api/admin/settings", { subtitle: sub, maxVotes: mv }, true);
+    if (res.success) {
+      state.settings = res.settings; renderAll(); renderSettings();
+      document.getElementById("newSubtitle").value = "";
+      document.getElementById("newMaxVotes").value = "";
+      const ok = document.getElementById("saveOk");
+      ok.style.display = "block";
+      setTimeout(() => ok.style.display = "none", 3000);
     }
-  }catch(e){console.error(e);}
-  setLoading(false);
-}
+  } catch (e) { alert("שגיאה: " + e.message); }
+});
 
-async function pollNew(){
-  if(!lastTs)return;
-  try{
-    const r=await fetch(BACKEND+'/feed?since='+lastTs);
-    const d=await r.json();
-    if(d.status==='ok'&&d.feed&&d.feed.length){
-      const newItems=d.feed;
-      lastTs=Math.max(...newItems.map(e=>e.ts||0),lastTs);
-      feedItems=[...newItems,...feedItems].slice(0,200);
-
-      if(isAtTop){
-        // User is at top — just prepend
-        renderFeed(newItems,true);
-      } else {
-        // User scrolled down — show toast
-        pendingNew=[...newItems,...pendingNew];
-        showNewToast();
-      }
+document.getElementById("resetVotesBtn").addEventListener("click", async () => {
+  if (!confirm("⚠️ לאפס את כל ההצבעות? לא ניתן לבטל!")) return;
+  try {
+    const res = await api("/api/admin/reset_votes", {}, true);
+    if (res.success) {
+      state.images.forEach(img => img.votes = 0);
+      state.userVotes = {};
+      sessionStorage.removeItem("_votes_" + userId);
+      renderAll(); renderAdminImgList(); renderRankings();
+      alert("✓ כל ההצבעות אופסו.");
     }
-  }catch(e){}
+  } catch (e) { alert("שגיאה: " + e.message); }
+});
+
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  adminToken = null;
+  sessionStorage.removeItem("_adminToken");
+  if (window.google && google.accounts) google.accounts.id.disableAutoSelect();
+  // Restore google button icon
+  document.getElementById("googleBtn").innerHTML = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>`;
+  document.getElementById("googleBtn").classList.remove("signed-in");
+  document.getElementById("googleBtn").title = "כניסת מנהל דרך Google";
+  closeModal();
+});
+
+// ══════════════════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════════════════
+function esc(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-function showNewToast(){
-  const toast=document.getElementById('newToast');
-  const txt=document.getElementById('newToastText');
-  txt.textContent=pendingNew.length===1?'עדכון חדש':`${pendingNew.length} עדכונים חדשים`;
-  toast.classList.add('show');
-}
+// ══════════════════════════════════════════════════════════
+//  MODAL / TABS
+// ══════════════════════════════════════════════════════════
+const overlay = document.getElementById("overlay");
 
-function scrollToTop(){
-  window.scrollTo({top:0,behavior:'smooth'});
-  if(pendingNew.length){
-    renderFeed(feedItems);
-    pendingNew=[];
+function openAdminModal() {
+  overlay.classList.add("open");
+  if (adminToken) {
+    // Already logged in — show panel directly (restore info from session)
+    document.getElementById("signingScreen").style.display = "none";
+    document.getElementById("adminPanel").style.display    = "block";
+    renderAdminImgList(); renderRankings(); renderSettings();
+    setActiveTab("tabImages");
+  } else {
+    document.getElementById("signingScreen").style.display = "block";
+    document.getElementById("adminPanel").style.display    = "none";
+    hideSigningError();
+    showSpinner(false);
   }
-  document.getElementById('newToast').classList.remove('show');
 }
 
-function setLoading(v){
-  document.getElementById('loadingBar').classList.toggle('show',v);
+overlay.addEventListener("click", e => { if (e.target === overlay) closeModal(); });
+document.getElementById("closeAdmin").addEventListener("click", closeModal);
+
+function closeModal() { overlay.classList.remove("open"); }
+
+document.querySelectorAll(".tab-btn").forEach(btn =>
+  btn.addEventListener("click", () => setActiveTab(btn.dataset.tab)));
+
+function setActiveTab(id) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === id));
+  document.querySelectorAll(".tab-content").forEach(c => c.classList.toggle("active", c.id === id));
+  if (id === "tabRankings") renderRankings();
+  if (id === "tabSettings") renderSettings();
 }
 
-// Scroll tracking
-window.addEventListener('scroll',()=>{
-  isAtTop=window.scrollY<80;
-  const btn=document.getElementById('scrollTopBtn');
-  btn.classList.toggle('show',window.scrollY>300);
-  if(isAtTop){
-    document.getElementById('newToast').classList.remove('show');
-    if(pendingNew.length){renderFeed(feedItems);pendingNew=[];}
-  }
-},{passive:true});
+// ══════════════════════════════════════════════════════════
+//  UPLOAD / SRC TOGGLE
+// ══════════════════════════════════════════════════════════
+let currentSrc = "upload", uploadedDataUrl = null;
 
-// Init
-loadFeed();
-setInterval(pollNew,6000);
+function setSrc(src) {
+  currentSrc = src;
+  document.getElementById("srcUpload").style.display  = src === "upload" ? "block" : "none";
+  document.getElementById("srcUrl").style.display     = src === "url"    ? "block" : "none";
+  document.getElementById("srcUploadBtn").classList.toggle("active", src === "upload");
+  document.getElementById("srcUrlBtn").classList.toggle("active",    src === "url");
+}
+document.getElementById("srcUploadBtn").addEventListener("click", () => setSrc("upload"));
+document.getElementById("srcUrlBtn").addEventListener("click",    () => setSrc("url"));
+
+const dropZone  = document.getElementById("dropZone");
+const fileInput = document.getElementById("fileInput");
+dropZone.addEventListener("click",    () => fileInput.click());
+dropZone.addEventListener("dragover", e  => { e.preventDefault(); dropZone.classList.add("drag-over"); });
+dropZone.addEventListener("dragleave",()  => dropZone.classList.remove("drag-over"));
+dropZone.addEventListener("drop",     e  => {
+  e.preventDefault(); dropZone.classList.remove("drag-over");
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith("image/")) loadFile(f);
+});
+fileInput.addEventListener("change", () => { if (fileInput.files[0]) loadFile(fileInput.files[0]); });
+
+function loadFile(file) {
+  const r = new FileReader();
+  r.onload = ev => {
+    uploadedDataUrl = ev.target.result;
+    document.getElementById("previewImg").src            = uploadedDataUrl;
+    document.getElementById("previewWrap").style.display = "block";
+    dropZone.style.display = "none";
+  };
+  r.readAsDataURL(file);
+}
+function clearPreview() {
+  uploadedDataUrl = null;
+  document.getElementById("previewImg").src             = "";
+  document.getElementById("previewWrap").style.display  = "none";
+  dropZone.style.display = "block"; fileInput.value = "";
+}
+document.getElementById("clearPreviewBtn").addEventListener("click", clearPreview);
+
+// ══════════════════════════════════════════════════════════
+//  LIGHTBOX
+// ══════════════════════════════════════════════════════════
+const lightbox = document.getElementById("lightbox");
+const lbImg    = document.getElementById("lbImg");
+function openLightbox(url)  { lbImg.src = url; lightbox.classList.add("open"); document.body.style.overflow = "hidden"; }
+function closeLightbox()    { lightbox.classList.remove("open"); lbImg.src = ""; document.body.style.overflow = ""; }
+document.getElementById("lbClose").addEventListener("click", closeLightbox);
+lightbox.addEventListener("click", e => { if (e.target === lightbox || e.target === lbImg) closeLightbox(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") { closeLightbox(); closeModal(); } });
+
+// ══════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════
+loadState();
+initGoogle();
 </script>
 </body>
 </html>
