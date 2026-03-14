@@ -69,6 +69,13 @@
     backdrop-filter:blur(8px); transition:all .2s; display:none;
   }
   #signInTopBtn:hover { border-color:rgba(201,168,76,0.4); color:var(--gold); }
+  #signOutTopBtn {
+    font-size:.75rem; color:rgba(232,224,208,0.45); background:transparent;
+    border:1px solid rgba(255,255,255,0.08); border-radius:100px;
+    padding:.3rem .8rem; cursor:pointer; font-family:inherit;
+    backdrop-filter:blur(8px); transition:all .2s; display:none;
+  }
+  #signOutTopBtn:hover { border-color:rgba(255,100,100,0.4); color:#ff9080; }
 
   /* MAIN */
   main { position:relative; z-index:10; max-width:1400px; margin:0 auto; padding:3rem 1.5rem; }
@@ -236,6 +243,7 @@
   <button id="signInTopBtn" onclick="openVoterModal()">🔑 התחבר להצבעה</button>
   <img id="userBarAvatar" src="" alt="" title=""/>
   <span id="userBarName"></span>
+  <button id="signOutTopBtn" onclick="voterLogout()" title="התנתק">✕ יציאה</button>
 </div>
 
 <!-- MAIN -->
@@ -388,8 +396,8 @@ const GOOGLE_CLIENT_ID = "856723702772-jm929ihp29ovhribfaaph17pbaq6qr3n.apps.goo
 let state = {
   images: [], settings: { maxVotes: 3, subtitle: "שלב 1 - אודישנים" }, userVotes: []
 };
-let voterToken  = sessionStorage.getItem("_voterToken")  || null;
-let voterUserId = sessionStorage.getItem("_voterUserId") || null;
+let voterToken  = localStorage.getItem("_voterToken")  || null;
+let voterUserId = localStorage.getItem("_voterUserId") || null;
 let adminToken  = sessionStorage.getItem("_adminToken")  || null;
 
 // ── API ────────────────────────────────────────────────────
@@ -446,8 +454,11 @@ async function handleGoogleForVoter(response) {
     if (res.success) {
       voterToken  = res.voterToken;
       voterUserId = res.userId;
-      sessionStorage.setItem("_voterToken",  voterToken);
-      sessionStorage.setItem("_voterUserId", voterUserId);
+      localStorage.setItem("_voterToken",   voterToken);
+      localStorage.setItem("_voterUserId",  voterUserId);
+      localStorage.setItem("_voterName",    res.name    || "");
+      localStorage.setItem("_voterPicture", res.picture || "");
+      localStorage.setItem("_voterEmail",   res.email   || "");
       // Fetch my current votes from server
       const vr = await api("/api/voter/votes",
         { voterToken }, { "X-Voter-Token": voterToken });
@@ -463,12 +474,14 @@ async function handleGoogleForVoter(response) {
 }
 
 function updateUserBar(info) {
-  const av   = document.getElementById("userBarAvatar");
-  const name = document.getElementById("userBarName");
-  const btn  = document.getElementById("signInTopBtn");
+  const av      = document.getElementById("userBarAvatar");
+  const name    = document.getElementById("userBarName");
+  const btnIn   = document.getElementById("signInTopBtn");
+  const btnOut  = document.getElementById("signOutTopBtn");
   if (info.picture) { av.src = info.picture; av.style.display = "block"; av.title = info.email; }
   if (info.name)    { name.textContent = info.name.split(" ")[0]; name.style.display = "block"; }
-  btn.style.display = "none";
+  btnIn.style.display  = "none";
+  btnOut.style.display = "block";
 }
 
 // ── Admin login ────────────────────────────────────────────
@@ -523,8 +536,10 @@ async function loadState() {
     renderAll();
     // Restore user bar if already logged in
     if (voterToken) {
-      document.getElementById("signInTopBtn").style.display = "none";
-      // We don't have name/picture in session easily — just hide the sign-in btn
+      const pic  = localStorage.getItem("_voterPicture") || "";
+      const name = localStorage.getItem("_voterName")    || "";
+      const email= localStorage.getItem("_voterEmail")   || "";
+      updateUserBar({ picture: pic, name, email });
     } else {
       document.getElementById("signInTopBtn").style.display = "block";
     }
@@ -724,6 +739,23 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
   document.getElementById("adminBtn").classList.remove("signed-in");
   closeModal("adminModal");
 });
+
+function voterLogout() {
+  voterToken  = null; voterUserId = null;
+  localStorage.removeItem("_voterToken");
+  localStorage.removeItem("_voterUserId");
+  localStorage.removeItem("_voterName");
+  localStorage.removeItem("_voterPicture");
+  localStorage.removeItem("_voterEmail");
+  if (window.google?.accounts) google.accounts.id.disableAutoSelect();
+  // Reset user bar
+  document.getElementById("userBarAvatar").style.display  = "none";
+  document.getElementById("userBarName").style.display    = "none";
+  document.getElementById("signOutTopBtn").style.display  = "none";
+  document.getElementById("signInTopBtn").style.display   = "block";
+  state.userVotes = [];
+  renderAll();
+}
 
 // ══════════════════════════════════════════════════════════
 //  MODAL HELPERS
