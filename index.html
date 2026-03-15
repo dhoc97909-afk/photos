@@ -593,7 +593,7 @@ function renderGrid() {
       </div>
       <div class="card-body">
         <div class="card-footer">
-          <span class="vote-count">${img.votes} ${img.votes===1?"הצבעה":"הצבעות"}</span>
+          <span class="vote-count">${adminToken ? img.votes + " " + (img.votes===1?"הצבעה":"הצבעות") : ""}</span>
           <button class="${btnClass}" ${disabled&&loggedIn?"disabled":""} data-id="${img.id}" data-voted="${voted}">
             ${btnLabel}
           </button>
